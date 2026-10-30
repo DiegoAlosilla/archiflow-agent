@@ -1,0 +1,7 @@
+# Configuración del proyecto; no modifica ~/.codex/config.toml.
+[mcp_servers.archiflow_drawio]
+command = "node"
+args = ["./node_modules/@drawio/mcp/src/index.js"]
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+enabled_tools = ["get_drawio_reference", "open_drawio_mermaid", "open_drawio_xml"]

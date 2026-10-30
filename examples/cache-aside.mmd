@@ -1,0 +1,22 @@
+%% Ejemplo ilustrativo: no procede del servicio rest-fights.
+sequenceDiagram
+    autonumber
+    participant C as Cliente
+    participant A as Pedidos API
+    participant R as Redis
+    participant D as Base de datos
+    C->>A: GET /orders/{id}
+    A->>R: GET order:{id}
+    R-->>A: Resultado
+    alt Existe en cache
+        A-->>C: 200 Pedido
+    else No existe en cache
+        A->>D: Consultar pedido
+        D-->>A: Resultado
+        alt Pedido encontrado
+            A->>R: SET con TTL configurado
+            A-->>C: 200 Pedido
+        else Pedido inexistente
+            A-->>C: 404
+        end
+    end

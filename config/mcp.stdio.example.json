@@ -1,0 +1,7 @@
+{
+  "transport": "stdio",
+  "command": "node",
+  "args": ["./node_modules/@drawio/mcp/src/index.js"],
+  "timeoutMs": 30000,
+  "env": { "DRAWIO_BASE_URL": "https://app.diagrams.net/" }
+}

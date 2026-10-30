@@ -1,0 +1,8 @@
+{
+  "transport": "http",
+  "url": "https://mcp.draw.io/mcp",
+  "timeoutMs": 60000,
+  "mermaidTool": "create_diagram",
+  "contentField": "mermaid",
+  "arguments": {}
+}

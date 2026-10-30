@@ -1,0 +1,3 @@
+interface:
+  display_name: "ArchiFlow Scan"
+  short_description: "Traza microservicios y genera Mermaid con evidencia"

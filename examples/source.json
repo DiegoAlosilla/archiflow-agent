@@ -1,0 +1,7 @@
+{
+  "url": "https://github.com/quarkusio/quarkus-super-heroes.git",
+  "revision": "e195d0a36d6d863213bbfe527db64cb51b3637f5",
+  "license": "Apache-2.0",
+  "directory": "examples/quarkus-super-heroes",
+  "service": "rest-fights"
+}

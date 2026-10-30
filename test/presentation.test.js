@@ -1,0 +1,61 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { JSDOM } from 'jsdom';
+import { fixture,validFlow } from './helpers.js';
+import { choosePresentation,normalizeSelection,renderPresentation } from '../src/presentation.js';
+import { runAudit,loadValidatedRun } from '../src/runner.js';
+import { readJson } from '../src/io.js';
+
+test('selección explícita, combinación y ausencia de elección en automatización',async()=>{
+  assert.deepEqual(await choosePresentation({'diagram-type':'integration,sequence,integration',direction:'LR'}),{types:['integration','sequence'],direction:'LR'});
+  assert.throws(()=>normalizeSelection('c4-code'),/Selecciona/);
+  assert.throws(()=>normalizeSelection('integration','diagonal'),/direction/);
+  await assert.rejects(choosePresentation({}, {input:{isTTY:false}}),/Falta elegir/);
+});
+test('vistas usan destinos auditados, mantienen endpoints fuera de C4 y conservan conexiones XML',async t=>{
+  const {inventory,out,repo}=await fixture(t);let calls=0;
+  await runAudit({repo,out},async()=>{calls++;return {result:{flows:[validFlow(inventory)]}};});
+  const {audit}=await loadValidatedRun(out);
+  await renderPresentation(out,inventory,audit.flows,normalizeSelection('integration,c4-container,sequence,dependencies','TB'));
+  const c4=await fs.readFile(path.join(out,'views/c4-container.mmd'),'utf8');
+  assert.match(c4,/C4Container/);assert.match(c4,/ContainerDb/);assert.doesNotMatch(c4,/\/orders/);assert.doesNotMatch(c4,/System_Boundary|Person\(/);
+  const doc=new JSDOM(await fs.readFile(path.join(out,'views/integration.drawio'),'utf8'),{contentType:'text/xml'}).window.document;
+  assert.equal(doc.querySelector('parsererror'),null);
+  assert.equal(doc.querySelectorAll('diagram').length,2);
+  const overview=doc.querySelector('diagram');
+  const vertices=[...overview.querySelectorAll('mxCell[vertex="1"]')];assert.equal(vertices.length,3);
+  const edge=overview.querySelector('mxCell[edge="1"][source="'+inventory.entries[0].id+'"]');assert.ok(edge);
+  assert.match(edge.parentElement.getAttribute('tooltip'),/Buscar pedido/);
+  assert.ok(vertices.some(v=>v.id===edge.getAttribute('target')));
+  assert.match(vertices[0].getAttribute('style'),/shape=module/);
+  assert.match(await fs.readFile(path.join(out,'views/integration.mmd'),'utf8'),/^flowchart TB/);
+  const saved=await choosePresentation({resume:true,out},{input:{isTTY:false}});assert.equal(saved.types.length,4);
+  await loadValidatedRun(out);
+  await renderPresentation(out,inventory,audit.flows,normalizeSelection('dependencies','LR'));
+  const selection=await readJson(path.join(out,'presentation.json'));assert.equal(selection.publish.length,1);assert.equal(selection.publish[0].file,'views/dependencies.mmd');assert.equal(calls,1);
+  await fs.appendFile(path.join(out,'views/dependencies.mmd'),'\nAPI-->invented');
+  await assert.rejects(loadValidatedRun(out),/modificado/);
+});
+test('alterar selección o XML impide confiar en el resultado auditado',async t=>{
+  const {inventory,out,repo}=await fixture(t);
+  await runAudit({repo,out,presentation:normalizeSelection('integration')},async()=>({result:{flows:[validFlow(inventory)]}}));
+  const file=path.join(out,'views/integration.drawio'),original=await fs.readFile(file,'utf8');
+  await fs.appendFile(file,'<!--edited-->');await assert.rejects(loadValidatedRun(out),/modificado/);
+  await fs.writeFile(file,original);await loadValidatedRun(out);
+  await fs.appendFile(path.join(out,'presentation.json'),' ');await assert.rejects(loadValidatedRun(out),/modificado/);
+});
+test('orientación LR cambia capas nativas y un fallo conserva la selección para reanudar',async t=>{
+  const {inventory,out,repo}=await fixture(t),selection=normalizeSelection('integration','LR');
+  await runAudit({repo,out,presentation:selection},async()=>{throw new Error('Motor no disponible');});
+  assert.deepEqual(await choosePresentation({resume:true,out},{input:{isTTY:false}}),selection);
+  await runAudit({repo,out,resume:true},async()=>({result:{flows:[validFlow(inventory)]}}));
+  const doc=new JSDOM(await fs.readFile(path.join(out,'views/integration.drawio'),'utf8'),{contentType:'text/xml'}).window.document;
+  const overview=doc.querySelector('diagram');
+  const root=overview.querySelector('mxCell[id="service"] mxGeometry');
+  const entry=overview.querySelector(`mxCell[id="${inventory.entries[0].id}"] mxGeometry`);
+  assert.ok(Number(entry.getAttribute('x'))>Number(root.getAttribute('x')));
+  assert.equal(root.getAttribute('y'),entry.getAttribute('y'));
+  await loadValidatedRun(out);
+});
