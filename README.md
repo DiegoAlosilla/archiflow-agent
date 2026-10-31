@@ -2,7 +2,7 @@
 
 Agente de auditoría para que un desarrollador pueda explicar qué hace un microservicio y qué ocurre detrás de cada entrada: APIs, Redis, almacenamiento, eventos, condiciones y fallos. Este es un proyecto independiente con sus propias skills y arnés; las skills históricas no son dependencias.
 
-**Dos recorridos:** código → documentación y Mermaid; Mermaid existente → validación y Draw.io MCP. La conexión MCP es configurable. La primera versión de descubrimiento está orientada a Java/Quarkus y Jakarta REST/OpenAPI.
+**Dos recorridos:** código → documentación, Mermaid y archivos `.drawio`; Mermaid existente → validación y `.drawio`. Los archivos se abren en Draw.io original, Desktop o local. La apertura automática en el editor local y la conexión MCP son opciones de entrega. La primera versión de descubrimiento está orientada a Java/Quarkus y Jakarta REST/OpenAPI.
 
 ## Instalación
 
@@ -19,7 +19,7 @@ node src/cli.js doctor
 npm test
 ```
 
-Si ya tienes sesión de Codex, no necesitas iniciar sesión de nuevo. Si no tienes su CLI, consulta la [instalación oficial](https://developers.openai.com/codex/cli/). `doctor` comprueba Node, Codex y el handshake MCP real; un error de autenticación impide el análisis, pero no el modo Mermaid/MCP.
+Si ya tienes sesión de Codex, no necesitas iniciar sesión de nuevo. Si no tienes su CLI, consulta la [instalación oficial](https://developers.openai.com/codex/cli/). `doctor` comprueba Node y Codex; añade `--check-mcp` para comprobar también MCP. Un error de autenticación impide el análisis, pero no convertir un Mermaid existente.
 
 Las dependencias están fijadas en `package-lock.json`. El MCP oficial se instala localmente. `--ignore-scripts` omite los scripts de instalación de dependencias; las herramientas STDIO utilizadas aquí no necesitan precalentar sus renderizadores opcionales. No se modifica configuración ni skills globales.
 
@@ -63,6 +63,23 @@ node src/cli.js render --run runs/rest-fights --diagram-type c4-container --dire
 
 `render` usa la auditoría ya validada sin repetir el análisis por IA. Consulta [tipos, plantillas y alcance C4](docs/diagramas.md).
 
+## Elegir la entrega
+
+El agente ofrece **archivos**, **editor local** o **MCP**. Sin elección en automatización usa archivos; la terminal interactiva pregunta. `--publish` se conserva como alias de `--delivery mcp`.
+
+```powershell
+# Paquete multipágina para abrir en cualquier Draw.io compatible
+node src/cli.js render --run runs/rest-fights --diagram-type integration,c4-container,sequence,dependencies --delivery files
+
+# Abrir en el editor local ya iniciado
+node src/cli.js render --run runs/rest-fights --diagram-type integration,sequence --delivery local --editor-url http://127.0.0.1:8080/
+
+# MCP opcional
+node src/cli.js render --run runs/rest-fights --diagram-type c4-container --delivery mcp
+```
+
+Abre `runs/rest-fights/diagrams.drawio` desde **Archivo → Abrir desde → Dispositivo** en la web original, o en tu editor local. El modo local comprueba disponibilidad y confirma la carga mediante un puente efímero; no requiere cambios en el fork. La [guía de entrega](docs/entrega.md) explica arranque, guardado, conexión y capacidades de conversión.
+
 ## Auditar tu servicio
 
 ```powershell
@@ -90,7 +107,7 @@ node src/cli.js diagram --mermaid examples/cache-aside.mmd --out runs/mermaid-de
 node src/cli.js diagram --mermaid examples/cache-aside.mmd --out runs/mermaid-publicado --publish
 ```
 
-Se admiten `flowchart`, `sequenceDiagram` y `C4Container`, sin directivas de configuración ni enlaces ejecutables. Este recorrido conserva el tipo del Mermaid recibido, valida sintaxis y registra origen; no afirma que el diagrama corresponda a un repositorio auditado.
+Se validan `flowchart`, `sequenceDiagram` y `C4Container`, sin directivas de configuración ni enlaces ejecutables. Se generan `diagram.mmd` y `diagram.drawio`; la conversión nativa admite el [subconjunto documentado](docs/entrega.md#mermaid-como-entrada) y rechaza construcciones no soportadas sin borrar su semántica. Este recorrido registra origen; no afirma que el diagrama corresponda a un repositorio auditado.
 
 ## Entregables
 
@@ -101,6 +118,8 @@ Se admiten `flowchart`, `sequenceDiagram` y `C4Container`, sin directivas de con
 | `architecture.mmd` | Mapa Mermaid de dependencias alcanzables |
 | `flows/*.sequence.mmd` | Secuencia Mermaid por entrada |
 | `architecture.drawio` | Mapa nativo editable, generado localmente |
+| `diagrams.drawio` | Paquete multipágina con todas las vistas seleccionadas, listo para abrir sin MCP |
+| `delivery.json` | Entrega por archivos o confirmación de carga en el editor local |
 | `presentation.json`, `views/*` | Selección de vistas, orientación y diagramas generados con esa elección |
 | `coverage.csv`, `evidence.csv` | Inventarios filtrables y citas |
 | `inventory.json` | Archivos, hashes, entradas, revisión y límites del descubrimiento |
@@ -126,7 +145,7 @@ En una sesión interactiva de Codex abierta en esta carpeta puedes pedir: «Usa 
 node src/cli.js mcp-check --out runs/mcp-check.json
 ```
 
-El cliente propio inicia el servidor local fijado, negocia MCP, descubre herramientas, consulta su referencia y valida argumentos contra el esquema anunciado. No genera una URL a mano para simular conexión. La configuración `.codex/config.toml` permite usar el mismo servidor desde una sesión de Codex que confíe en este proyecto.
+El cliente propio inicia el servidor local fijado, negocia MCP, descubre herramientas, consulta su referencia y valida argumentos contra el esquema anunciado. No genera una URL a mano para simular conexión. La configuración `.codex/config.toml` incluye el mismo servidor deshabilitado por defecto (`enabled = false`); actívalo si quieres usar sus herramientas directamente en una sesión de Codex que confíe en este proyecto. El CLI con `--delivery mcp` administra su conexión por separado.
 
 Consulta [conexión y configuración MCP](docs/mcp.md), [arquitectura y controles](docs/harness.md) y [extender el agente](docs/development.md).
 

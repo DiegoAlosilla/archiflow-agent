@@ -11,7 +11,7 @@ Una auditoría conserva los mismos hallazgos y permite diferentes presentaciones
 
 El adjunto creditos.xml se interpretó como un diagrama de integración con notación de componentes UML: `shape=module`, agrupaciones `umlFrame`, roles API/MS y conectores ortogonales. «Integración por capas» es el nombre de nuestra plantilla, no un estándar formal. Esta primera plantilla adapta las figuras, colores y orientación; no reproduce exactamente todas las agrupaciones del proyecto ni inventa roles UX/BS. Los datos del adjunto no se incorporan a otros servicios.
 
-`TB` ordena de arriba abajo; `LR`, de izquierda a derecha. En integración las capas son servicio, endpoints y destinos; su posición no afirma que las dependencias se invoquen en ese orden. En C4 la orientación guía relaciones, pero el motor Mermaid controla el layout final. La secuencia siempre conserva tiempo hacia abajo y participantes en horizontal.
+`TB` ordena de arriba abajo; `LR`, de izquierda a derecha. En integración las capas son servicio, endpoints y destinos; su posición no afirma que las dependencias se invoquen en ese orden. En C4 nativo la orientación dirige la disposición del grafo; el Mermaid equivalente puede distribuirlo de otro modo. La secuencia siempre conserva tiempo hacia abajo y participantes en horizontal.
 
 ## Ejemplos
 
@@ -35,13 +35,16 @@ Fuera de una terminal interactiva, omitir `--diagram-type` produce un mensaje qu
 
 - `views/integration.drawio`: componentes nativos editables; vista general y una página por endpoint. Las etiquetas resumen las relaciones y los tooltips conservan operaciones/condiciones completas. Se publica con `open_drawio_xml`.
 - `views/integration.mmd`: equivalente de relaciones en Mermaid; las figuras de componente se simplifican.
-- `views/c4-container.mmd`: sintaxis Mermaid `C4Container`.
-- `views/dependencies.mmd`: mapa de dependencias con orientación elegida.
-- `flows/*.sequence.mmd`: detalle por endpoint.
+- `views/c4-container.mmd` y `.drawio`: contenedores C4 en Mermaid y figuras nativas.
+- `views/dependencies.mmd` y `.drawio`: mapa de dependencias con orientación elegida.
+- `flows/*.sequence.mmd`: detalle por endpoint; `views/sequences.drawio` reúne sus páginas nativas, con bloques y ramas.
+- `diagrams.drawio`: todas las vistas seleccionadas en un solo archivo multipágina.
+
+Todos los tipos se generan localmente sin MCP. Puedes abrir el archivo en Draw.io original, Desktop o local. `--delivery files|local|mcp` elige cómo entregarlo; consulta [guía de entrega](entrega.md).
 
 `publish` usa solo la selección vigente. `--all-diagrams` añade las secuencias. Los archivos de vistas anteriores pueden permanecer en disco, pero ya no forman parte de la selección. El informe base y sus secuencias siguen disponibles para consulta. Los hashes de las nuevas vistas y de la selección se comprueban antes de publicar. Cambiar de vista requiere fuentes originales sin modificaciones y una auditoría completa validada.
 
-Para conservar figuras de integración usa el MCP STDIO incluido. Un servidor HTTP que exponga únicamente `create_diagram` no admite la publicación XML de esta plantilla; el cliente informa la incompatibilidad antes de publicar el lote.
+Para publicar las nuevas vistas nativas mediante MCP usa el servidor STDIO incluido. Un servidor HTTP que exponga únicamente `create_diagram` no admite publicación XML; el cliente informa la incompatibilidad antes de publicar el lote. Las secuencias seleccionadas se publican como un archivo multipágina; `--all-diagrams` no las duplica.
 
 ## Alcance C4
 

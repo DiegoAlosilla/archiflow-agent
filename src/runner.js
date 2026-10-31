@@ -25,7 +25,7 @@ export async function loadValidatedRun(out) {
     if(!item||hash(await fs.readFile(path.join(out,file),'utf8'))!==item.sha256)throw new Error(`Diagrama modificado después de validación: ${file}. Usa el modo diagram para publicar una edición manual.`);
   }
   for(const item of artifacts.files.filter(a=>!expected.includes(a.file))) {
-    if(!/^(presentation\.json|architecture\.drawio|views\/[a-z0-9-]+\.(mmd|drawio))$/.test(item.file))throw new Error('Artefacto inesperado en manifiesto.');
+    if(!/^(presentation\.json|diagrams\.drawio|architecture\.drawio|views\/[a-z0-9-]+\.(mmd|drawio))$/.test(item.file))throw new Error('Artefacto inesperado en manifiesto.');
     if(hash(await fs.readFile(path.join(out,item.file),'utf8'))!==item.sha256)throw new Error(`Diagrama modificado después de validación: ${item.file}`);
   }
   // A selection record is trusted only when included in the artifact manifest.

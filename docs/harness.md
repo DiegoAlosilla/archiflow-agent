@@ -7,7 +7,7 @@
 3. **Coordinador:** objetivos por entrada, lotes secuenciales, escritura atómica, exclusión mutua de ejecuciones y un máximo de dos intentos cuando la respuesta incumple validación. Fallos de autenticación/motor/timeout no se reintentan automáticamente.
 4. **Validación:** contrato, IDs únicos, cobertura, destinos alcanzables, referencias, archivos del inventario, hashes, intervalos, citas literales, asociación entre paso y mensaje Mermaid y parser Mermaid real.
 5. **Entregables:** Markdown/CSV, Mermaid por entrada, mapa agregado y XML Draw.io editable. Las respuestas parciales conservan trabajo válido.
-6. **Cliente MCP:** handshake, catálogo y esquemas descubiertos, referencia, llamada y registro del resultado. La publicación de auditorías exige cobertura seleccionada completa.
+6. **Entrega:** archivos portátiles por defecto, puente local opcional y cliente MCP opcional. El puente usa un puerto loopback efímero, ruta aleatoria, origen/ventana verificados y confirmación de carga; no sirve el filesystem. El MCP negocia handshake, catálogo y esquemas, consulta referencia, realiza la llamada y registra el resultado. La entrega de auditorías exige cobertura seleccionada completa. Los hashes cubren también el paquete XML multipágina.
 
 ## Estados y reanudación
 

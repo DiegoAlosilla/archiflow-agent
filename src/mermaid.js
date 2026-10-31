@@ -22,3 +22,9 @@ export async function validateMermaid(source) {
   }
   try { await parser.parse(source); } catch(error) { throw new Error(`Mermaid inválido: ${error.message}`); }
 }
+
+// Keep the pinned Mermaid parser as the authority for syntax and control blocks.
+export async function mermaidDiagram(source) {
+  await validateMermaid(source);
+  return parser.mermaidAPI.getDiagramFromText(source);
+}

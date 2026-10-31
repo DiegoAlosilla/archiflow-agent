@@ -15,4 +15,8 @@ Para cambiar la presentación de hallazgos existentes usa `node src/cli.js rende
 
 Para Mermaid ya escrito ejecuta `node src/cli.js diagram --mermaid <archivo.mmd> --out <directorio>`. La validación sintáctica no confirma la arquitectura; documenta que proviene del usuario y no fue auditado contra código.
 
+Pregunta también la entrega si el usuario no la indicó: archivos portátiles (recomendado), apertura en editor local o MCP. Pasa `--delivery files|local|mcp`; reutiliza preferencias ya expresadas. Archivos no requiere MCP. El arnés genera `diagrams.drawio` multipágina con todas las vistas elegidas y conserva Mermaid; puede abrirse manualmente en Draw.io original, Desktop o local. `diagram` genera `diagram.drawio` y `diagram.mmd`. La conversión usa el parser de Mermaid y rechaza capacidades sin soporte en lugar de eliminar ramas. Consulta `docs/entrega.md` para instalación y límites.
+
+Para apertura local, usa `--delivery local --editor-url http://127.0.0.1:8080/` con el editor ya iniciado. No modifiques ni fusiones el fork de Draw.io. El puente efímero confirma carga mediante el protocolo embed; distingue carga, inspección visual y guardado. Si el editor no responde, conserva el archivo y explica cómo abrirlo manualmente; no envíes contenido a un servicio externo como alternativa automática.
+
 No elimines errores o ramas para mejorar el dibujo. Divide escenarios grandes y enlaza sus documentos. Usa el vocabulario del desarrollador y conserva rutas exactas del contrato.

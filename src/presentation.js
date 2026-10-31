@@ -3,6 +3,7 @@ import { createInterface } from 'node:readline/promises';
 import { architecture, technologyLabel } from './render.js';
 import { atomicWrite, readJson, writeJson, hash } from './io.js';
 import { validateMermaid } from './mermaid.js';
+import { mermaidToDrawio, bundleDrawio } from './drawio.js';
 
 export const diagramTypes = [
   {id:'dependencies',name:'Mapa de dependencias',description:'Servicio y destinos alcanzables; vista resumida.'},
@@ -96,14 +97,26 @@ export async function renderPresentation(out,inventory,flows,selection) {
   selection=normalizeSelection(selection.types,selection.direction);
   const graph=await architecture(inventory,flows),outputs=[],publish=[];
   const add=(file,content,format='mermaid')=>{outputs.push({file,content});publish.push({id:file,file,format});};
-  if(selection.types.includes('dependencies'))add('views/dependencies.mmd',graph.source.replace('flowchart LR',`flowchart ${selection.direction}`));
+  const pair=async(file,source,title)=>{
+    outputs.push({file:`views/${file}.mmd`,content:source});
+    add(`views/${file}.drawio`,await mermaidToDrawio(source,{title,direction:selection.direction}),'xml');
+  };
+  if(selection.types.includes('dependencies'))await pair('dependencies',graph.source.replace('flowchart LR',`flowchart ${selection.direction}`),'Dependencias');
   if(selection.types.includes('integration')) {
     const view=integration(inventory,flows,graph,selection.direction);
     outputs.push({file:'views/integration.mmd',content:view.mermaid});
     add('views/integration.drawio',view.drawio,'xml');
   }
-  if(selection.types.includes('c4-container'))add('views/c4-container.mmd',c4(inventory,graph,selection.direction));
-  if(selection.types.includes('sequence'))for(const f of flows.filter(f=>f.status==='analyzed'))publish.push({id:f.entryId,file:`flows/${f.entryId}.sequence.mmd`,format:'mermaid'});
+  if(selection.types.includes('c4-container'))await pair('c4-container',c4(inventory,graph,selection.direction),'C4 · Contenedores · alcance parcial');
+  if(selection.types.includes('sequence')) {
+    const pages=[];
+    for(const f of flows.filter(f=>f.status==='analyzed')) {
+      const entry=inventory.entries.find(e=>e.id===f.entryId);
+      pages.push({content:await mermaidToDrawio(f.sequenceMermaid,{title:`Secuencia · ${entry.method} ${entry.route}`})});
+    }
+    add('views/sequences.drawio',bundleDrawio(pages),'xml');
+  }
+  outputs.push({file:'diagrams.drawio',content:bundleDrawio(outputs.filter(o=>o.file.endsWith('.drawio')))});
   for(const output of outputs)if(output.file.endsWith('.mmd'))await validateMermaid(output.content);
   const manifest=await readJson(path.join(out,'artifacts.json'));
   for(const output of outputs)await atomicWrite(path.join(out,output.file),output.content);

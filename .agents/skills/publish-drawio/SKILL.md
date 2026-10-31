@@ -5,11 +5,13 @@ description: Publica Mermaid o XML validados mediante el MCP oficial de Draw.io,
 
 # Publicar con Draw.io MCP
 
-Primero `node src/cli.js mcp-check --out runs/mcp-check.json`. La conexión predeterminada usa el servidor oficial instalado y fijado en package-lock.json, por STDIO. `--mcp <config.json>` permite otro STDIO o Streamable HTTP.
+MCP es una entrega opcional: aplica esta conexión únicamente si el usuario eligió MCP o pidió publicación por ese canal. Para archivos o editor local usa `--delivery files|local`, sin handshake MCP. Consulta `docs/entrega.md`.
+
+Cuando se elige MCP, primero `node src/cli.js mcp-check --out runs/mcp-check.json`. La conexión predeterminada usa el servidor oficial instalado y fijado en package-lock.json, por STDIO. `--mcp <config.json>` permite otro STDIO o Streamable HTTP.
 
 Después `node src/cli.js publish --run <directorio>` o `node src/cli.js diagram --mermaid <archivo> --out <directorio> --publish`. El cliente pide la referencia, descubre herramientas y valida argumentos contra su esquema antes de llamar. No sustituyas una llamada MCP por un enlace construido manualmente.
 
-Con `presentation.json`, publica las vistas elegidas por el usuario. Integración se publica como XML mediante `open_drawio_xml` para conservar componentes y conexiones ortogonales; requiere el MCP STDIO oficial o uno compatible con esa herramienta. El resto usa Mermaid. Si el servidor solo admite Mermaid, informa la limitación de estilo antes de proponer el archivo alternativo `views/integration.mmd`. No cambies silenciosamente de plantilla. Varias secuencias pueden abrir varias pestañas.
+Con `presentation.json`, publica las vistas elegidas por el usuario. Las cuatro vistas se publican como XML mediante `open_drawio_xml` para conservar figuras editables; requiere el MCP STDIO oficial o uno compatible. Las secuencias se agrupan en un archivo multipágina. Si el servidor solo admite Mermaid, informa la incompatibilidad antes de proponer otra entrega; no cambies silenciosamente de plantilla. `--publish` sigue siendo alias de `--delivery mcp`.
 
 Conserva Mermaid y el registro de publicación incluso si falla. El resultado puede ser URL, vista o archivo: registra lo que ocurrió. Una URL no prueba inspección visual ni guardado en Draw.io. No publiques un resultado de auditoría con fallos de evidencia/cobertura.
 

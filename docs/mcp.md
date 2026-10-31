@@ -1,5 +1,7 @@
 # Conexión MCP de Draw.io
 
+MCP es opcional. La entrega predeterminada genera archivos portátiles sin iniciar servidor MCP. Para apertura manual o automática en un editor local consulta [entrega](entrega.md). Las cuatro vistas seleccionables ahora tienen XML nativo editable y utilizan `open_drawio_xml`; los servidores que solo admiten Mermaid no pueden publicar esas vistas nativas. Los registros antiguos pueden seguir seleccionando Mermaid.
+
 ## Predeterminada: STDIO local
 
 Después de `npm ci --ignore-scripts`, ejecuta desde la raíz:

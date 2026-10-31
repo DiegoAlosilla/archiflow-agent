@@ -34,7 +34,7 @@ test('vistas usan destinos auditados, mantienen endpoints fuera de C4 y conserva
   const saved=await choosePresentation({resume:true,out},{input:{isTTY:false}});assert.equal(saved.types.length,4);
   await loadValidatedRun(out);
   await renderPresentation(out,inventory,audit.flows,normalizeSelection('dependencies','LR'));
-  const selection=await readJson(path.join(out,'presentation.json'));assert.equal(selection.publish.length,1);assert.equal(selection.publish[0].file,'views/dependencies.mmd');assert.equal(calls,1);
+  const selection=await readJson(path.join(out,'presentation.json'));assert.equal(selection.publish.length,1);assert.equal(selection.publish[0].file,'views/dependencies.drawio');assert.equal(calls,1);
   await fs.appendFile(path.join(out,'views/dependencies.mmd'),'\nAPI-->invented');
   await assert.rejects(loadValidatedRun(out),/modificado/);
 });
